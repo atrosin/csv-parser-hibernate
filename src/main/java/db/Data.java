@@ -1,9 +1,6 @@
 package db;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 @Entity
 public class Data {
@@ -18,7 +15,8 @@ public class Data {
     private String email;
     @Column(name = "D")
     private String sex;
-    @Column(name = "E")
+    @Lob
+    @Column(name = "E", columnDefinition = "BLOB")
     private String imagePath;
     @Column(name = "F")
     private String payment;
@@ -116,5 +114,81 @@ public class Data {
 
     public void setId(long id) {
         this.id = id;
+    }
+    public static  class Builder{
+        private String firstName;
+        private String lastName;
+        private String email;
+        private String sex;
+        private String imagePath;
+        private String payment;
+        private String amount;
+        private String isActive;
+        private String isSuccessful;
+        private String city;
+
+        public Builder setFirstName(String firstName) {
+            this.firstName = firstName;
+            return this;
+        }
+
+        public Builder setLastName(String lastName) {
+            this.lastName = lastName;
+            return this;
+        }
+
+        public Builder setEmail(String email) {
+            this.email = email;
+            return this;
+        }
+
+        public Builder setSex(String sex) {
+            this.sex = sex;
+            return this;
+        }
+
+        public Builder setImagePath(String imagePath) {
+            this.imagePath = imagePath;
+            return this;
+        }
+
+        public Builder setPayment(String payment) {
+            this.payment = payment;
+            return this;
+        }
+
+        public Builder setAmount(String amount) {
+            this.amount = amount;
+            return this;
+        }
+
+        public Builder setIsActive(String isActive) {
+            this.isActive = isActive;
+            return this;
+        }
+
+        public Builder setIsSuccessful(String isSuccessful) {
+            this.isSuccessful = isSuccessful;
+            return this;
+        }
+
+        public Builder setCity(String city) {
+            this.city = city;
+            return this;
+        }
+        public Data build(){
+            Data data = new Data();
+            data.firstName = this.firstName;
+            data.lastName  = this.lastName;
+            data.email = this.email;
+            data.sex = this.sex;
+            data.imagePath = this.imagePath;
+            data.payment = this.payment;
+            data.amount = this.amount;
+            data.isActive = this.isActive;
+            data.isSuccessful = this.isSuccessful;
+            data.city = this.city;
+            return data;
+        }
     }
 }
