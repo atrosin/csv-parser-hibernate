@@ -16,7 +16,7 @@ import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
-        final String fileSeparator = System.getProperty("file.separator");
+        String fileSeparator = System.getProperty("file.separator");
         File csvFile = readFilePath();
         String csvFileDir = csvFile.getParent();
         String badDataFileName = csvFileDir + fileSeparator + "bad-data-" + System.currentTimeMillis() + ".csv";
