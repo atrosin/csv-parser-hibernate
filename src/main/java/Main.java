@@ -15,48 +15,46 @@ import java.util.List;
 import java.util.Scanner;
 
 public class Main {
-    private static final String FILE_SEPARATOR = System.getProperty("file.separator");
-
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-        File fullPath = new File(scanner.nextLine());
-        String csvFileDir = fullPath.getParent();
-        String badDataFileName = csvFileDir + FILE_SEPARATOR + "bad-data-" + System.currentTimeMillis() + ".csv";
-        String logFileName = csvFileDir + FILE_SEPARATOR + "log.csv";
-        File file = new File(badDataFileName);
-
+        final String fileSeparator = System.getProperty("file.separator");
+        File csvFile = readFilePath();
+        String csvFileDir = csvFile.getParent();
+        String badDataFileName = csvFileDir + fileSeparator + "bad-data-" + System.currentTimeMillis() + ".csv";
+        String logFileName = csvFileDir + fileSeparator + "log.csv";
+        File badDataFile = new File(badDataFileName);
+        CSVReader csvReader;
+        CSVWriter csvWriter;
         Transaction transaction = null;
+
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            file.createNewFile();
-
+            badDataFile.createNewFile();
             transaction = session.beginTransaction();
-
-            CSVReader csvReader = new CSVReader(new FileReader(fullPath));
-            CSVWriter csvWriter = new CSVWriter(new FileWriter(file));
-            String[] line;
-            List<String[]> list = new ArrayList<>();
+            csvReader = new CSVReader(new FileReader(csvFile));
+            csvWriter = new CSVWriter(new FileWriter(badDataFile));
+            String[] csvLine;
+            List<String[]> badDataList = new ArrayList<>();
             int receivedRowsCount = 0;
             int successfulRowsCount = 0;
             int failedRowsCount = 0;
-            while ((line = csvReader.readNext()) != null) {
-                if (line.length == 10) {
-                    if (Arrays.stream(line).anyMatch(String::isEmpty)) {
-                        list.add(line);
+            while ((csvLine = csvReader.readNext()) != null) {
+                if (csvLine.length == 10) {
+                    if (Arrays.stream(csvLine).anyMatch(String::isEmpty)) {
+                        badDataList.add(csvLine);
                         failedRowsCount++;
                     } else {
-                        Data data = createData(line);
+                        Data data = createData(csvLine);
                         session.save(data);
                         successfulRowsCount++;
                     }
                     receivedRowsCount++;
                 }
             }
-            csvWriter.writeAll(list);
+            csvWriter.writeAll(badDataList, false);
             csvWriter.close();
             csvReader.close();
             transaction.commit();
             log(receivedRowsCount, successfulRowsCount, failedRowsCount, logFileName);
-        } catch (Exception e) {
+        } catch (IOException e) {
             if (transaction != null) {
                 transaction.rollback();
             }
@@ -64,9 +62,18 @@ public class Main {
         }
     }
 
+    private static File readFilePath() {
+        Scanner scanner = new Scanner(System.in);
+        File csvFilePath = new File(scanner.nextLine());
+        while (!csvFilePath.exists()) {
+            csvFilePath = new File(scanner.nextLine());
+        }
+        return csvFilePath;
+    }
+
     private static void log(int received, int success, int failed, String logFilePath) throws IOException {
         File logFile = new File(logFilePath);
-        if (!logFile.exists()){
+        if (!logFile.exists()) {
             logFile.createNewFile();
         }
         CSVWriter csvWriter = new CSVWriter(new FileWriter(logFile));
